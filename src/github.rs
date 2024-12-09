@@ -6,6 +6,7 @@ use std::collections::hash_map::HashMap;
 pub struct PrInfo {
     // Holy shit there are so many prs on nixpkgs
     number: u64,
+    state: String,
     title: String,
 }
 
