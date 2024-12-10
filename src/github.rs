@@ -10,15 +10,15 @@ pub struct PrInfo {
     title: String,
 }
 
-pub async fn get_pr_info(pr: u32) -> Result<PrInfo, Box<dyn std::error::Error>> {
+pub async fn get_pr_info(pr: u32) -> Result<serde_json::value::Value, Box<dyn std::error::Error>> {
     let client = reqwest::Client::builder()
         .user_agent(format!("big-brother {}", env!("CARGO_PKG_VERSION")))
         .build()?;
     
-    let response: PrInfo = client.get(format!("https://api.github.com/repos/nixos/nixpkgs/pulls/{}", pr))
+    let response: serde_json::value::Value = client.get(format!("https://api.github.com/repos/nixos/nixpkgs/pulls/{}", pr))
         .send()
         .await?
-	.json::<PrInfo>()
+	.json::<serde_json::value::Value>()
 	.await?;
 
     // println!("{response:?}");

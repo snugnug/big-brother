@@ -7,5 +7,5 @@ async fn main() {
     // github::get_pr_info(32).await;
     let test = github::get_pr_info(32).await;
 
-    println!("{:?}", test);
+    println!("{:?}", test.expect("failed to get json :(").get("state"));
  }
