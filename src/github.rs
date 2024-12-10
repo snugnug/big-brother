@@ -2,9 +2,11 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct PrInfo {
+    pub id: u64,
     pub state: String,
+    pub merge_commit_sha: String,
 }
 
 pub async fn get_pr_info(pr: u32) -> Result<PrInfo, Box<dyn std::error::Error>> {
