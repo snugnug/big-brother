@@ -1,4 +1,4 @@
-use reqwest::Client;
+use reqwest::{Client, Response};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -8,6 +8,14 @@ pub struct PrInfo {
     pub state: String,
     pub merge_commit_sha: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PrCompare {
+    pub status: String,
+}
+
+// TODO(sako):: Move client outside of the functions to allow for token support
+// TODO(sako):: Better error handling
 
 pub async fn get_pr_info(pr: u32) -> Result<PrInfo, Box<dyn std::error::Error>> {
     let client = Client::builder()
@@ -23,3 +31,34 @@ pub async fn get_pr_info(pr: u32) -> Result<PrInfo, Box<dyn std::error::Error>> 
     // println!("{response:?}");
     Ok(response)
 }
+
+// TODO(sako):: Make this optional and require an API Token to avoid ratelimits and make one that uses
+// locally installed git instead to check if the commit is in a nixpkgs branch
+pub async fn compare_branches_api(branch: &str, commit_hash: String) -> Result<bool, Box<dyn::std::error::Error>> {
+    println!("asjkdfsjakdfjkwef");
+    let client = Client::builder()
+        .user_agent(format!("bright-brother {}", env!("CARGO_PKG_VERSION")))
+        .build()?;
+
+    println!("{}", branch.to_string());
+    println!("{}", commit_hash);
+	
+
+    let response: PrCompare = client.get(format!("https://api.github.com/repos/nixos/nixpkgs/compare/{}...{}", branch.to_string(), commit_hash))
+        .send()
+        .await?
+	.json::<PrCompare>()
+	.await?;
+
+    println!("{:?}", response);
+
+    // ["behind", "identical"].contains(response.status) instead? (do this later just check if it works first)
+    if response.status == "behind" || response.status == "identical" {
+	println!("In nixpkgs!");
+	Ok(true)
+    } else {
+	println!("lol no");
+	Ok(false)
+    }
+}
+
