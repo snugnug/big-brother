@@ -14,14 +14,9 @@ pub struct PrCompare {
     pub status: String,
 }
 
-// TODO(sako):: Move client outside of the functions to allow for token support
 // TODO(sako):: Better error handling
 
-pub async fn get_pr_info(pr: u32) -> Result<PrInfo, Box<dyn std::error::Error>> {
-    let client = Client::builder()
-        .user_agent(format!("big-brother {}", env!("CARGO_PKG_VERSION")))
-        .build()?;
-    
+pub async fn get_pr_info(client: reqwest::Client, pr: u32) -> Result<PrInfo, Box<dyn std::error::Error>> {
     let response: PrInfo = client.get(format!("https://api.github.com/repos/nixos/nixpkgs/pulls/{}", pr))
         .send()
         .await?
@@ -34,11 +29,8 @@ pub async fn get_pr_info(pr: u32) -> Result<PrInfo, Box<dyn std::error::Error>> 
 
 // TODO(sako):: Make this optional and require an API Token to avoid ratelimits and make one that uses
 // locally installed git instead to check if the commit is in a nixpkgs branch
-pub async fn compare_branches_api(branch: &str, commit_hash: String) -> Result<bool, Box<dyn::std::error::Error>> {
+pub async fn compare_branches_api(client: reqwest::Client, branch: &str, commit_hash: String) -> Result<bool, Box<dyn::std::error::Error>> {
     println!("asjkdfsjakdfjkwef");
-    let client = Client::builder()
-        .user_agent(format!("bright-brother {}", env!("CARGO_PKG_VERSION")))
-        .build()?;
 
     println!("{}", branch.to_string());
     println!("{}", commit_hash);
