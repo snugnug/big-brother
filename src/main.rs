@@ -1,6 +1,9 @@
 use reqwest::Client;
+use sqlx::SqlitePool;
 
 mod github;
+mod database;
+
 #[tokio::main]
 async fn main() {
     println!("Hello, world!");
