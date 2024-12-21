@@ -1,11 +1,23 @@
 use reqwest::Client;
 use sqlx::SqlitePool;
+use clap::Parser;
 
 mod github;
 mod database;
 
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    /// Path to store monitored data
+    #[arg(short, long, default_value = "/var/lib/big-brother")]
+    datadir: String,
+}
+
 #[tokio::main]
 async fn main() {
+
+    let args = Args::parse();
+    
     println!("Hello, world!");
     let client = Client::builder()
         .user_agent(format!("big-brother {}", env!("CARGO_PKG_VERSION")))
