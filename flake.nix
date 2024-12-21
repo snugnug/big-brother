@@ -14,7 +14,8 @@
       devShells = eachSystem (pkgs: {
         default = pkgs.mkShell {
           packages = attrValues {
-            inherit (pkgs) cargo rustc rust-analyzer rustfmt pkg-config openssl;
+            inherit (pkgs)
+              cargo rustc rust-analyzer rustfmt pkg-config openssl sqlx-cli;
           };
         };
       });
