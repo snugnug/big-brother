@@ -11,11 +11,11 @@ pub struct PullRequest {
 pub async fn initalize_database(path: String) -> Pool<Sqlite> {
     let dbpath: String = path.clone() + "/database.db";
     
-    println!("{}", path);
-    println!("{}", dbpath.clone());
+    tracing::info!("creating database in {}", path);
+    tracing::debug!("database path is {}", dbpath.clone());
 
     if std::path::Path::new(dbpath.clone().as_str()).exists() {
-	println!("Database exists, skipping initalization...");
+	tracing::warn!("Database exists, skipping initalization...");
     } else {
  
     Sqlite::create_database(

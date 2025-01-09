@@ -30,10 +30,8 @@ pub async fn get_pr_info(client: reqwest::Client, pr: u32) -> Result<PrInfo, Box
 // TODO(sako):: Make this optional and require an API Token to avoid ratelimits and make one that uses
 // locally installed git instead to check if the commit is in a nixpkgs branch
 pub async fn compare_branches_api(client: reqwest::Client, branch: &str, commit_hash: String) -> Result<bool, Box<dyn::std::error::Error>> {
-    println!("asjkdfsjakdfjkwef");
-
-    println!("{}", branch.to_string());
-    println!("{}", commit_hash);
+    tracing::debug!("{}", branch.to_string());
+    tracing::debug!("{}", commit_hash);
 	
 
     let response: PrCompare = client.get(format!("https://api.github.com/repos/nixos/nixpkgs/compare/{}...{}", branch.to_string(), commit_hash))
@@ -42,14 +40,14 @@ pub async fn compare_branches_api(client: reqwest::Client, branch: &str, commit_
 	.json::<PrCompare>()
 	.await?;
 
-    println!("{:?}", response);
+    tracing::debug!("{:?}", response);
 
     // ["behind", "identical"].contains(response.status) instead? (do this later just check if it works first)
     if response.status == "behind" || response.status == "identical" {
-	println!("In nixpkgs!");
+	tracing::debug!("In nixpkgs!");
 	Ok(true)
     } else {
-	println!("lol no");
+	tracing::debug!("lol no");
 	Ok(false)
     }
 }

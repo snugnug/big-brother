@@ -16,32 +16,44 @@ struct Args {
 #[tokio::main]
 async fn main() {
 
+    let subscriber = tracing_subscriber::fmt()
+    // Use a more compact, abbreviated log format
+	.compact()
+    // Display source code file paths
+	.with_file(true)
+    // Display source code line numbers
+	.with_line_number(true)
+    // Don't display the event's target (module path)
+	.with_target(false)
+    // Build the subscriber
+	.finish();
+
+    tracing::subscriber::set_global_default(subscriber);
+
     let args = Args::parse();
 
     match std::fs::create_dir_all(args.datadir.clone()) {
         Ok(_) => {}
         Err(err) => {
-            panic!("Could not create data directory! {}", err);
+	    tracing::error!("Could not create data directory!");
+            panic!("{}", err);
         }
     };
 
-    println!("Hello, world!");
     let client = Client::builder()
         .user_agent(format!("big-brother {}", env!("CARGO_PKG_VERSION")))
         .build()
         .unwrap();
 
-    println!("Creating database");
     let db = database::initalize_database(args.datadir).await;
 
-    // github::get_pr_info(32).await;
-    // let test = github::get_pr_info(client.clone(), 345325).await;
+    let test = github::get_pr_info(client.clone(), 345325).await;
 
-    // println!("{:?}", test.as_ref().unwrap());
+    tracing::info!("{:?}", test.as_ref().unwrap());
 
-    // let test2 = github::compare_branches_api(client,
-    // 	"nixos-unstable", test.unwrap().merge_commit_sha.to_string()).await;
+    let test2 = github::compare_branches_api(client,
+	"nixos-unstable", test.unwrap().merge_commit_sha.to_string()).await;
 
-    // println!("{:?}", test2.unwrap());
+    tracing::info!("{:?}", test2.unwrap());
 
  }
