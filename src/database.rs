@@ -8,6 +8,13 @@ pub struct PullRequest {
     pub unmerged_into: Vec<String>,
 }
 
+#[derive(FromRow)]
+pub struct DiscordUsers {
+    pub id: u64,
+    pub requested_server_id: u64,
+    pub watching_prs: Vec<u64>
+}
+
 pub async fn initalize_database(path: String) -> Pool<Sqlite> {
     let dbpath: String = path.clone() + "/database.db";
     
@@ -34,6 +41,7 @@ pub async fn initalize_database(path: String) -> Pool<Sqlite> {
         .await
 	.unwrap();
 
+    tracing::info!("applying migrations");
     sqlx::migrate!("./migrations").run(&db).await.unwrap();
 
     return db;
