@@ -4,6 +4,7 @@ use clap::Parser;
 
 mod github;
 mod database;
+mod web;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -58,13 +59,15 @@ async fn main() {
 
     let db = database::initalize_database(args.datadir).await;
 
-    let test = github::get_pr_info(client.clone(), 345325).await;
+    web::serve_web().await;
 
-    tracing::info!("{:?}", test.as_ref().unwrap());
+    // let test = github::get_pr_info(client.clone(), 345325).await;
 
-    let test2 = github::compare_branches_api(client,
-	"nixos-unstable", test.unwrap().merge_commit_sha.to_string()).await;
+    // tracing::info!("{:?}", test.as_ref().unwrap());
 
-    tracing::info!("{:?}", test2.unwrap());
+    // let test2 = github::compare_branches_api(client,
+    // 	"nixos-unstable", test.unwrap().merge_commit_sha.to_string()).await;
+
+    // tracing::info!("{:?}", test2.unwrap());
 
  }
