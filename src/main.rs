@@ -33,8 +33,14 @@ async fn main() {
 	})
 	.finish();
 
-    tracing::subscriber::set_global_default(subscriber);
-
+    match tracing::subscriber::set_global_default(subscriber) {
+	Ok(_) => {}
+	Err(err) => {
+	    tracing::error!("Could not create logger!");
+	    panic!("{}", err);
+	}
+    };
+	
     let args = Args::parse();
 
     match std::fs::create_dir_all(args.datadir.clone()) {
