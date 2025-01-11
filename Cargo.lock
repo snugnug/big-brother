@@ -36,7 +36,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "683d7910e743518b0e34f1186f92494becacb047c7b6bf616c96772180fef923"
 
 [[package]]
-<<<<<<< HEAD
 name = "anstream"
 version = "0.6.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -83,7 +82,6 @@ checksum = "2109dbce0e72be3ec00bed26e6a7479ca384ad226efdd66db8fa2e3a38c83125"
 dependencies = [
  "anstyle",
  "windows-sys 0.59.0",
-=======
 name = "askama"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -125,7 +123,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "acb1161c6b64d1c3d83108213c2a2533a342ac225aabd0bda218278c2ddb00c0"
 dependencies = [
  "nom",
->>>>>>> 1da2bf3 (axum askama)
 ]
 
 [[package]]
@@ -243,12 +240,9 @@ dependencies = [
 name = "big-brother"
 version = "0.1.0"
 dependencies = [
-<<<<<<< HEAD
  "clap",
-=======
  "askama",
  "axum",
->>>>>>> 1da2bf3 (axum askama)
  "reqwest",
  "serde",
  "serde_json",
