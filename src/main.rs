@@ -26,6 +26,11 @@ async fn main() {
     // Don't display the event's target (module path)
 	.with_target(false)
     // Build the subscriber
+	.with_max_level(if cfg!(debug_assertions) {
+	    tracing::Level::DEBUG
+	} else {
+	    tracing::Level::INFO
+	})
 	.finish();
 
     tracing::subscriber::set_global_default(subscriber);
