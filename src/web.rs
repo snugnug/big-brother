@@ -1,4 +1,4 @@
-use axum::{routing::get, response::Html, Router};
+use axum::{routing::get, response::Html, Router, extract::Path};
 use askama::{Template};
 
 pub async fn serve_web() {
@@ -7,14 +7,25 @@ pub async fn serve_web() {
 
 #[derive(Template)]
 #[template(path = "pr.html")]
-struct Test {}
+struct Test {
+    test: String,
+    id: u64
+}
+
+async fn get_pr(Path(prId): Path<u64>) -> Html<String>{
+
+    let template = Test {
+	test: "Hello".to_string(),
+	id: prId
+    };
+    
+    return Html(template.render().unwrap())
+}
 
 async fn serve() {
 
-    let template = Test {};
-    
     let app = Router::new()
-        .route("/pr", get(Html(template.render().unwrap())))
+        .route("/pr/{id}", get(get_pr))
         .route("/", get("Hi"));
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
