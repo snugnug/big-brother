@@ -51,34 +51,34 @@ async fn main() {
         }
     };
 
-    let client = Client::builder()
-        .user_agent(format!("big-brother {}", env!("CARGO_PKG_VERSION")))
-        .build()
-        .unwrap();
+    // let client = Client::builder()
+    //     .user_agent(format!("big-brother {}", env!("CARGO_PKG_VERSION")))
+    //     .build()
+    //     .unwrap();
 
     let db = database::initalize_database(args.datadir).await;
 
-    // web::serve_web().await;
+    web::serve_web().await;
 
     // let test = github::get_pr_info(client.clone(), 345325).await;
     // let test = github::get_pr_info(client.clone(), 999342).await;
-    let test = match github::get_pr_info(client.clone(), 999342).await {
-        Ok(data) => {
-            println!("Bomba ras clat");
-            data
-        }
-        Err(err) => {
-            // println!("Bomba clatt {}", err);
-            tracing::error!("its over {}", err);
-            return;
-        }
-    };
+    // let test = match github::get_pr_info(client.clone(), 999342).await {
+    //     Ok(data) => {
+    //         println!("Bomba ras clat");
+    //         data
+    //     }
+    //     Err(err) => {
+    //         // println!("Bomba clatt {}", err);
+    //         tracing::error!("its over {}", err);
+    //         return;
+    //     }
+    // };
 
-    tracing::info!("{:?}", test);
+    // tracing::info!("{:?}", test);
 
-    let test2 =
-        github::compare_branches_api(client, "nixos-unstable", test.merge_commit_sha.to_string())
-            .await;
+    // let test2 =
+    //     github::compare_branches_api(client, "nixos-unstable", test.merge_commit_sha.to_string())
+    //         .await;
 
-    tracing::info!("{:?}", test2.unwrap());
+    // tracing::info!("{:?}", test2.unwrap());
 }
