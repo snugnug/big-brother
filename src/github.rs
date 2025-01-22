@@ -92,16 +92,16 @@ pub async fn compare_branches_api(
     // .await?;
 
     if response.status().is_success() {
-	let output = response.json::<PrCompare>().await.unwrap();
-	if output.status == "behind" || output.status == "identical" {
+        let output = response.json::<PrCompare>().await.unwrap();
+        if output.status == "behind" || output.status == "identical" {
             tracing::debug!("In nixpkgs!");
-            return Ok(true)
-	} else {
+            return Ok(true);
+        } else {
             tracing::debug!("lol no");
-            return Ok(false)
-	}
+            return Ok(false);
+        }
     } else {
-	return Err(format!("failed with error code {}", response.status()).into());
+        return Err(format!("failed with error code {}", response.status()).into());
     }
 
     // tracing::debug!("{:?}", response);

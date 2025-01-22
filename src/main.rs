@@ -69,15 +69,16 @@ async fn main() {
         }
         Err(err) => {
             // println!("Bomba clatt {}", err);
-	    tracing::error!("its over {}", err);
+            tracing::error!("its over {}", err);
             return;
         }
     };
 
     tracing::info!("{:?}", test);
 
-    let test2 = github::compare_branches_api(client,
-	"nixos-unstable", test.merge_commit_sha.to_string()).await;
+    let test2 =
+        github::compare_branches_api(client, "nixos-unstable", test.merge_commit_sha.to_string())
+            .await;
 
     tracing::info!("{:?}", test2.unwrap());
 }
