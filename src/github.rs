@@ -44,7 +44,7 @@ impl From<reqwest::Error> for EpicFail {
 
 pub async fn get_pr_info(
     client: reqwest::Client,
-    pr: u32,
+    pr: u64,
 ) -> Result<PrInfo, Box<dyn std::error::Error>> {
     let info = client
         .get(format!(
