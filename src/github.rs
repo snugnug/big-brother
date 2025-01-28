@@ -74,7 +74,7 @@ pub async fn get_pr_info(
 // locally installed git instead to check if the commit is in a nixpkgs branch
 pub async fn compare_branches_api(
     client: reqwest::Client,
-    branch: &str,
+    branch: String,
     commit_hash: String,
 ) -> Result<bool, Box<dyn ::std::error::Error>> {
     tracing::debug!("{}", branch.to_string());
