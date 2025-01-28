@@ -11,8 +11,11 @@ pub async fn serve_web() {
 #[template(path = "pr.html")]
 struct Test {
     test: String,
+    error: String,
     id: u64,
-    failed: bool
+    failed: bool,
+    branches: Vec<String>,
+    merged_into: Vec<bool>
 }
 
 async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
@@ -33,7 +36,10 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
 	    let template = Test {
 		test: "Bruhh epic fail".to_string(),
 		id: prId,
-		failed: true
+		failed: true,
+		error: err.to_string(),
+		branches: vec![],
+		merged_into: vec![]
 	    };
 	    return Html(template.render().unwrap());
 	}
@@ -42,7 +48,10 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
     let template = Test {
         test: "Hello".to_string(),
         id: prId,
-	failed: false
+	failed: false,
+	error: "You shouldn't see this lol".to_string(),
+	branches: target_branches,
+	merged_into: in_branches
     };
 
     return Html(template.render().unwrap());
