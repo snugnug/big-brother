@@ -26,7 +26,7 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
         .unwrap();
 
 
-    let pr = match github::get_pr_info(client, prId).await {
+    let pr = match github::get_pr_info(client.clone(), prId).await {
 	Ok(data) => {
 	    tracing::debug!("Got pr {}", prId);
 	    data
@@ -43,6 +43,34 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
 	    };
 	    return Html(template.render().unwrap());
 	}
+    };
+
+    let target_branches = vec!["master".to_string(), "nixpkgs-unstable".to_string(), "nixos-unstable-small".to_string(), "nixos-unstable".to_string(), "nixos-24.11-small".to_string(), "nixos-24.11".to_string()];
+
+    let mut in_branches: Vec<bool> = vec![];
+
+    for branch in target_branches.clone().into_iter() {
+	// github::compare_branches_api(client, branch, pr.merge_commit_sha);
+	let merged: bool = match github::compare_branches_api(client.clone(), branch.clone(), pr.merge_commit_sha.clone()).await {
+	    Ok(data) => {
+		tracing::debug!("Merge status for {} into {}, {}", prId, branch, data);
+		data
+	    }
+	    Err(err) => {
+		tracing::error!("Failed to get pr, {}", err);
+		let template = Test {
+		    test: "Bruhh epic fail".to_string(),
+		    id: prId,
+		    failed: true,
+		    error: err.to_string(),
+		    branches: vec![],
+		    merged_into: vec![]
+		};
+		return Html(template.render().unwrap());
+	    }
+	};
+
+	in_branches.push(merged);
     };
         
     let template = Test {
