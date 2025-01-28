@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html>
     <h1>Big-Brother, a nixpkgs tracker.</h1>
+    {% if failed %}
+    <p>{{ error }}</p>
+    {% else %}
+    {% for branch in branches %}
+    <p>{{ branch }}</p>
+    <p>{{ merged_into[loop.index0]}}</p>
+    {% endfor %}
+    {% endif %}
     <li>
     </li>
 </html>
