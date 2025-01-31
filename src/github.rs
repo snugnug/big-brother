@@ -1,9 +1,9 @@
-use axum::http::status;
-use reqwest::{Client, Request, Response};
+// use axum::http::status;
+// use reqwest::{Client, Request, Response};
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use std::error::Error;
-use std::fmt::{self, Display, Formatter};
+// use serde_json::Value;
+// use std::error::Error;
+// use std::fmt::{self, Display, Formatter};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PrInfo {
@@ -18,28 +18,28 @@ pub struct PrCompare {
     pub status: String,
 }
 
-#[derive(Debug)]
-pub enum EpicFail {
-    RequestError(reqwest::Error),
-    ParseError(serde_json::Error),
-}
+// #[derive(Debug)]
+// pub enum EpicFail {
+//     RequestError(reqwest::Error),
+//     ParseError(serde_json::Error),
+// }
 
-impl Error for EpicFail {}
+// impl Error for EpicFail {}
 
-impl Display for EpicFail {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self {
-            Self::RequestError(e) => write!(f, "Request failed! {}", e),
-            Self::ParseError(e) => write!(f, "Parse failed! {}", e),
-        }
-    }
-}
+// impl Display for EpicFail {
+//     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+//         match self {
+//             Self::RequestError(e) => write!(f, "Request failed! {}", e),
+//             Self::ParseError(e) => write!(f, "Parse failed! {}", e),
+//         }
+//     }
+// }
 
-impl From<reqwest::Error> for EpicFail {
-    fn from(err: reqwest::Error) -> EpicFail {
-        EpicFail::RequestError(err)
-    }
-}
+// impl From<reqwest::Error> for EpicFail {
+//     fn from(err: reqwest::Error) -> EpicFail {
+//         EpicFail::RequestError(err)
+//     }
+// }
 
 // TODO(sako):: Better error handling
 
@@ -54,8 +54,6 @@ pub async fn get_pr_info(
         ))
         .send()
         .await?;
-    // .json::<PrInfo>()
-    // .await?;
 
     tracing::debug!("{}", info.status());
 
@@ -65,10 +63,6 @@ pub async fn get_pr_info(
     } else {
         Err(format!("failed with error code {}", info.status()).into())
     }
-
-    // let bleh = info.json::<PrInfo>().await?;
-
-    // Ok(bleh)
 }
 
 // TODO(sako):: Make this optional and require an API Token to avoid ratelimits and make one that uses
@@ -89,8 +83,6 @@ pub async fn compare_branches_api(
         ))
         .send()
         .await?;
-    // .json::<PrCompare>()
-    // .await?;
 
     if response.status().is_success() {
         let output = response.json::<PrCompare>().await.unwrap();
@@ -104,15 +96,4 @@ pub async fn compare_branches_api(
     } else {
         return Err(format!("failed with error code {}", response.status()).into());
     }
-
-    // tracing::debug!("{:?}", response);
-
-    // ["behind", "identical"].contains(response.status) instead? (do this later just check if it works first)
-    // if response.status == "behind" || response.status == "identical" {
-    //     tracing::debug!("In nixpkgs!");
-    //     Ok(true)
-    // } else {
-    //     tracing::debug!("lol no");
-    //     Ok(false)
-    // }
 }
