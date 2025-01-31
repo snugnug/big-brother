@@ -18,29 +18,6 @@ pub struct PrCompare {
     pub status: String,
 }
 
-// #[derive(Debug)]
-// pub enum EpicFail {
-//     RequestError(reqwest::Error),
-//     ParseError(serde_json::Error),
-// }
-
-// impl Error for EpicFail {}
-
-// impl Display for EpicFail {
-//     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-//         match self {
-//             Self::RequestError(e) => write!(f, "Request failed! {}", e),
-//             Self::ParseError(e) => write!(f, "Parse failed! {}", e),
-//         }
-//     }
-// }
-
-// impl From<reqwest::Error> for EpicFail {
-//     fn from(err: reqwest::Error) -> EpicFail {
-//         EpicFail::RequestError(err)
-//     }
-// }
-
 // TODO(sako):: Better error handling
 
 pub async fn get_pr_info(
@@ -54,9 +31,6 @@ pub async fn get_pr_info(
             "https://api.github.com/repos/nixos/nixpkgs/pulls/{}",
             pr
         ));
-	// .header(reqwest::header::AUTHORIZATION, api_key)
-        // .send()
-        // .await?;
 
     if api_key != None {
 	request = request.header(reqwest::header::AUTHORIZATION, api_key.unwrap());
@@ -92,9 +66,6 @@ pub async fn compare_branches_api(
             branch.to_string(),
             commit_hash
         ));
-        // .header(reqwest::header::AUTHORIZATION, api_key)
-        // .send()
-    // .await?;
 
     if api_key != None {
 	request = request.header(reqwest::header::AUTHORIZATION, api_key.unwrap());
