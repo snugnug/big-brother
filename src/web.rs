@@ -21,7 +21,7 @@ struct Test {
 async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
     let client = Client::builder()
         .user_agent(format!("big-brother {}", env!("CARGO_PKG_VERSION")))
-             .build()
+        .build()
         .unwrap();
 
     let pr = match github::get_pr_info(client.clone(), prId).await {
