@@ -2,6 +2,7 @@ use crate::github;
 use reqwest::Client;
 use askama::Template;
 use axum::{extract::Path, response::Html, routing::get, Router};
+use tower_http::services::ServeFile;
 
 pub async fn serve_web() {
     serve().await
@@ -47,13 +48,23 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
 
     let mut in_branches: Vec<bool> = vec![];
 
-    for branch in target_branches.clone().into_iter() {
-	// github::compare_branches_api(client, branch, pr.merge_commit_sha);
-	let merged: bool = match github::compare_branches_api(client.clone(), branch.clone(), pr.merge_commit_sha.clone()).await {
-	    Ok(data) => {
-		tracing::debug!("Merge status for {} into {}, {}", prId, branch, data);
-		data
-	    }
+    // let mut tasks = vec![];
+    
+    let tasks: Vec<_> = target_branches.clone()
+        .iter()
+        .map(|branch| {
+	    let branch_clone = branch.clone();
+	    let client_clone = client.clone();
+	    let pr_merge_commit_sha = pr.merge_commit_sha.clone();
+	    tokio::spawn(async move { github::compare_branches_api(client_clone, branch_clone, pr_merge_commit_sha).await})}).collect();
+
+    // let mut results: Vec<bool> = vec![];
+    
+    for task in tasks {
+	// let thing = task.await.unwrap();
+
+	match task.await {
+	    Ok(data) => in_branches.push(data.unwrap()),
 	    Err(err) => {
 		tracing::error!("Failed to get pr, {}", err);
 		let template = Test {
@@ -66,10 +77,12 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
 		return Html(template.render().unwrap());
 	    }
 	};
-
-	in_branches.push(merged);
-    };
-        
+    }
+    
+    if in_branches.is_empty() || in_branches.is_empty() {
+        tracing::warn!("Results or in_branches are empty, check logic.");
+    }
+    
     let template = Test {
 	pr_title: pr.title,
 	failed: false,
@@ -84,11 +97,13 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
 async fn serve() {
     let app = Router::new()
         .route("/pr/{id}", get(get_pr))
-        .route("/", get("Hi"));
+        .route("/", get("Hi"))
+        .route_service("/main.css", ServeFile::new("assets/main.css"));
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
         .await
         .unwrap();
+
     tracing::info!("Serving web on {}", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap()
 }
