@@ -1,4 +1,32 @@
 html {
     background-color: #000000;
-    color: #ffffff
+    color: #ffffff;
+}
+
+.true {
+    color: #00ff00;
+}
+
+.true:before {
+    content: '[';
+    color: #ffffff;
+}
+
+.true:after {
+    content: ']';
+    color: #ffffff;
+}
+
+ .false {
+    color: #ff0000;
+}
+
+.false:before {
+    content: '[';
+    color: #ffffff;
+}
+
+.false:after {
+    content: ']';
+    color: #ffffff;
 }

@@ -9,8 +9,8 @@
     {% else %}
     <p>{{ pr_title }}</p>
     {% for branch in branches %}
-    <p>{{ branch }}</p>
-    <p>{{ merged_into[loop.index0]}}</p>
+    <p class="branch">{{ branch }}</p>
+    <p class="{{ merged_into[loop.index0] }}"> {{ merged_into[loop.index0]}} </p>
     {% endfor %}
     {% endif %}
     <li>
