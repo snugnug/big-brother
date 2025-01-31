@@ -25,15 +25,14 @@ pub async fn get_pr_info(
     pr: u64,
 ) -> Result<PrInfo, Box<dyn std::error::Error>> {
     let api_key = std::env::var("GITHUB_API_KEY").ok();
-    
-    let mut request = client
-        .get(format!(
-            "https://api.github.com/repos/nixos/nixpkgs/pulls/{}",
-            pr
-        ));
+
+    let mut request = client.get(format!(
+        "https://api.github.com/repos/nixos/nixpkgs/pulls/{}",
+        pr
+    ));
 
     if api_key != None {
-	request = request.header(reqwest::header::AUTHORIZATION, api_key.unwrap());
+        request = request.header(reqwest::header::AUTHORIZATION, api_key.unwrap());
     };
 
     let info = request.send().await?;
@@ -60,15 +59,14 @@ pub async fn compare_branches_api(
 
     let api_key = std::env::var("GITHUB_API_KEY").ok();
 
-    let mut request = client
-        .get(format!(
-            "https://api.github.com/repos/nixos/nixpkgs/compare/{}...{}",
-            branch.to_string(),
-            commit_hash
-        ));
+    let mut request = client.get(format!(
+        "https://api.github.com/repos/nixos/nixpkgs/compare/{}...{}",
+        branch.to_string(),
+        commit_hash
+    ));
 
     if api_key != None {
-	request = request.header(reqwest::header::AUTHORIZATION, api_key.unwrap());
+        request = request.header(reqwest::header::AUTHORIZATION, api_key.unwrap());
     };
 
     let response = request.send().await?;
