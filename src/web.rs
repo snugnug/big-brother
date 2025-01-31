@@ -48,8 +48,6 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
 
     let mut in_branches: Vec<bool> = vec![];
 
-    // let mut tasks = vec![];
-    
     let tasks: Vec<_> = target_branches.clone()
         .iter()
         .map(|branch| {
@@ -58,10 +56,7 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
 	    let pr_merge_commit_sha = pr.merge_commit_sha.clone();
 	    tokio::spawn(async move { github::compare_branches_api(client_clone, branch_clone, pr_merge_commit_sha).await})}).collect();
 
-    // let mut results: Vec<bool> = vec![];
-    
     for task in tasks {
-	// let thing = task.await.unwrap();
 
 	match task.await {
 	    Ok(data) => in_branches.push(data.unwrap()),
