@@ -10,10 +10,8 @@ pub async fn serve_web() {
 #[derive(Template)]
 #[template(path = "pr.html")]
 struct Test {
-    test: String,
     pr_title: String,
     error: String,
-    id: u64,
     failed: bool,
     branches: Vec<String>,
     merged_into: Vec<bool>
@@ -36,8 +34,6 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
 	    tracing::error!("Failed to get pr, {}", err);
 	    let template = Test {
 		pr_title: "Errored!".to_string(),
-		test: "Bruhh epic fail".to_string(),
-		id: prId,
 		failed: true,
 		error: err.to_string(),
 		branches: vec![],
@@ -62,8 +58,6 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
 		tracing::error!("Failed to get pr, {}", err);
 		let template = Test {
 		    pr_title: "Errored!".to_string(),
-		    test: "Bruhh epic fail".to_string(),
-		    id: prId,
 		    failed: true,
 		    error: err.to_string(),
 		    branches: vec![],
@@ -78,8 +72,6 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
         
     let template = Test {
 	pr_title: pr.title,
-        test: "Hello".to_string(),
-        id: prId,
 	failed: false,
 	error: "You shouldn't see this lol".to_string(),
 	branches: target_branches,
