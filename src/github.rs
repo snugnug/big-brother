@@ -7,6 +7,7 @@ use std::fmt::{self, Display, Formatter};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PrInfo {
+    pub title: String,
     pub id: u64,
     pub state: String,
     pub merge_commit_sha: String,

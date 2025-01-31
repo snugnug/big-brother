@@ -11,6 +11,7 @@ pub async fn serve_web() {
 #[template(path = "pr.html")]
 struct Test {
     test: String,
+    pr_title: String,
     error: String,
     id: u64,
     failed: bool,
@@ -34,6 +35,7 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
 	Err(err) => {
 	    tracing::error!("Failed to get pr, {}", err);
 	    let template = Test {
+		pr_title: "Errored!".to_string(),
 		test: "Bruhh epic fail".to_string(),
 		id: prId,
 		failed: true,
@@ -59,6 +61,7 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
 	    Err(err) => {
 		tracing::error!("Failed to get pr, {}", err);
 		let template = Test {
+		    pr_title: "Errored!".to_string(),
 		    test: "Bruhh epic fail".to_string(),
 		    id: prId,
 		    failed: true,
@@ -74,6 +77,7 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
     };
         
     let template = Test {
+	pr_title: pr.title,
         test: "Hello".to_string(),
         id: prId,
 	failed: false,
