@@ -132,6 +132,7 @@ async fn index() -> Html<String> {
 async fn serve() {
     let app = Router::new()
         .route("/pr/{id}", get(get_pr))
+        .route("/pr", get(|| async { Redirect::permanent("/") }))
         .route("/", get(index))
         .route_service("/main.css", ServeFile::new("assets/main.css"));
 
