@@ -19,7 +19,7 @@ rustPlatform.buildRustPackage {
   ];
 
   # cargoHash = lib.fakeHash;
-  cargoHash = "sha256-GiZh+/C1s9S8QT5zjbat+LQ806ka+NQO7eoAgI/Ff4E=";
+  cargoHash = "sha256-8dZmCK0d15yf1mOzEmLhFL6XGmsabMn7bVfj5wS1rEM=";
 
   meta = {
     description = "A nixpkgs tracker with notifications!";
