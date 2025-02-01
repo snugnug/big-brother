@@ -6,13 +6,17 @@
     <h1>Big-Brother, a nixpkgs tracker.</h1>
     {% if failed %}
     <p>{{ error }}</p>
+    {% else if closed %}
+    <p>{{ pr_title }}</p>
+    <p>This pr was closed n~n</p>
     {% else %}
     <p>{{ pr_title }}</p>
+    <div class="container">
     {% for branch in branches %}
-    <p class="branch">{{ branch }}</p>
-    <p class="{{ merged_into[loop.index0] }}"> {{ merged_into[loop.index0]}} </p>
+    <div class="status">
+    <p class="branch">{{ branch }} <span class="{{ merged_into[loop.index0] }}">{{ merged_into[loop.index0] }}</span></p>
+    </div>
     {% endfor %}
+    </div>
     {% endif %}
-    <li>
-    </li>
 </html>

@@ -14,9 +14,14 @@ struct Test {
     pr_title: String,
     error: String,
     failed: bool,
+    closed: bool,
     branches: Vec<String>,
     merged_into: Vec<bool>,
 }
+
+#[derive(Template)]
+#[template(path = "index.html")]
+struct Index {}
 
 async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
     let client = Client::builder()
@@ -34,6 +39,7 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
             let template = Test {
                 pr_title: "Errored!".to_string(),
                 failed: true,
+                closed: false,
                 error: err.to_string(),
                 branches: vec![],
                 merged_into: vec![],
@@ -41,6 +47,18 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
             return Html(template.render().unwrap());
         }
     };
+
+    if pr.state == "closed" {
+        let template = Test {
+            pr_title: pr.title,
+            failed: false,
+            closed: true,
+            error: "-w-".to_string(),
+            branches: vec![],
+            merged_into: vec![],
+        };
+        return Html(template.render().unwrap());
+    }
 
     let target_branches = vec![
         "master".to_string(),
@@ -61,7 +79,12 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
             let client_clone = client.clone();
             let pr_merge_commit_sha = pr.merge_commit_sha.clone();
             tokio::spawn(async move {
-                github::compare_branches_api(client_clone, branch_clone, pr_merge_commit_sha).await
+                github::compare_branches_api(
+                    client_clone,
+                    branch_clone,
+                    pr_merge_commit_sha.unwrap(),
+                )
+                .await
             })
         })
         .collect();
@@ -74,6 +97,7 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
                 let template = Test {
                     pr_title: "Errored!".to_string(),
                     failed: true,
+                    closed: false,
                     error: err.to_string(),
                     branches: vec![],
                     merged_into: vec![],
@@ -90,6 +114,7 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
     let template = Test {
         pr_title: pr.title,
         failed: false,
+        closed: false,
         error: "You shouldn't see this lol".to_string(),
         branches: target_branches,
         merged_into: in_branches,
@@ -98,10 +123,16 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
     return Html(template.render().unwrap());
 }
 
+async fn index() -> Html<String> {
+    let template = Index {};
+
+    return Html(template.render().unwrap());
+}
+
 async fn serve() {
     let app = Router::new()
         .route("/pr/{id}", get(get_pr))
-        .route("/", get("Hi"))
+        .route("/", get(index))
         .route_service("/main.css", ServeFile::new("assets/main.css"));
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
