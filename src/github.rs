@@ -10,7 +10,19 @@ pub struct PrInfo {
     pub title: String,
     pub id: u64,
     pub state: String,
-    pub merge_commit_sha: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub merge_commit_sha: Option<String>,
+}
+
+impl Default for PrInfo {
+    fn default() -> PrInfo {
+        PrInfo {
+            title: "".to_string(),
+            id: 0,
+            state: "".to_string(),
+            merge_commit_sha: Some("".to_string()),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
