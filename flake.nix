@@ -13,9 +13,16 @@
       lib.genAttrs ["x86_64-linux"]
       (system: f nixpkgs.legacyPackages.${system});
   in {
-    packages = eachSystem (pkgs: {
+    packages = eachSystem (pkgs: rec {
       big-brother = pkgs.callPackage ./nix/package.nix {};
+      default = big-brother;
     });
+
+    nixosModules = eachSystem (pkgs: rec {
+      big-brother = import ./nix/module.nix {big-brother = self.packages."x86_64-linux".big-brother;};
+      default = big-brother;
+    });
+
     devShells = eachSystem (pkgs: {
       default = pkgs.mkShell {
         packages = attrValues {
