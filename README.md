@@ -2,6 +2,8 @@
 A nixpkgs tracker (soon-to also be a notifier) for checking merge statues/where a pull request is.
 Currently barebones, but it gets the job done!
 
+You can find the official instance at https://big-brother.sako.lol
+
 ## Usage
 Run the executable and optionally change the host and port
 ```
