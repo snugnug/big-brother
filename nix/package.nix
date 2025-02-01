@@ -18,7 +18,7 @@ in
       repo = "big-brother";
       tag = "v${version}";
       # hash = lib.fakeHash;
-      hash = "sha256-eXzRQELBZwAKkFnPI+ckXasDsm3NAVfBeVlCZGShLL8=";
+      hash = "sha256-RdGcNscZG4AkCqumjpX8Sp8wgKwP6OvLR6R9J7sIkUk=";
     };
 
     nativeBuildInputs = [
