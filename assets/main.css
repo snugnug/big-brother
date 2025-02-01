@@ -1,6 +1,10 @@
 html {
     background-color: #000000;
     color: #ffffff;
+    font-family: monospace;
+    display: flex;
+    justify-content: center;
+    text-align: center;
 }
 
 .true {
@@ -29,4 +33,16 @@ html {
 .false:after {
     content: ']';
     color: #ffffff;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+.status {
+    display: inline-block;
+    margin: 0 10px;
 }
