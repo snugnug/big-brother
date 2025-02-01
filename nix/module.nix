@@ -3,11 +3,11 @@ inputs: {
   lib,
   pkgs,
 }: let
-  cfg = config.modules.desktop.apps.big-brother;
+  cfg = config.services.big-brother;
   inherit (lib) mkEnableOption;
   inherit (pkgs.stdenv.hostPlatform) system;
 in {
-  options.modules.desktop.apps.big-brother = {
+  options.services.big-brother = {
     enable = mkEnableOption "big-brother Nixpkgs Tracker";
     hostname = lib.mkOption {
       type = lib.types.str;
