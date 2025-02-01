@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-	<link rel="stylesheet" href="/main.css">
+	<title>Big-Brother</title>
     </head>
     <h1>Big-Brother, a nixpkgs tracker.</h1>
     <form action="/pr" method="get">
@@ -15,5 +15,55 @@
          this.action = `/pr/${prId}`;
      });
     </script>
+    <style>
+     html {
+	 background-color: #000000;
+	 color: #ffffff;
+	 font-family: monospace;
+	 display: flex;
+	 justify-content: center;
+	 text-align: center;
+     }
+
+     .true {
+	 color: #00ff00;
+     }
+
+     .true:before {
+	 content: '[';
+	 color: #ffffff;
+     }
+
+     .true:after {
+	 content: ']';
+	 color: #ffffff;
+     }
+
+     .false {
+	 color: #ff0000;
+     }
+
+     .false:before {
+	 content: '[';
+	 color: #ffffff;
+     }
+
+     .false:after {
+	 content: ']';
+	 color: #ffffff;
+     }
+
+     .container {
+	 display: flex;
+	 flex-direction: column;
+	 justify-content: center;
+	 flex-wrap: nowrap;
+     }
+
+     .status {
+	 display: inline-block;
+	 margin: 0 10px;
+     }
+    </style>
 </html>
 
