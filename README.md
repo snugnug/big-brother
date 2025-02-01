@@ -18,13 +18,17 @@ Binary should be in the `target/release` folder.
 ## Installation
 <details>
 <summary>Nix</summary>
+<br>
 Add the flake as an input 
+
 ```nix
 inputs = {
 	big-brother.url = "github:snugnug/big-brother";
 };
 ```
+
 and then use it in your configuration.nix as so
+
 ```nix
   imports = [inputs.big-brother.nixosModules.default];
   
@@ -35,5 +39,6 @@ and then use it in your configuration.nix as so
     };
   };
 ```
+
 </details>
 
