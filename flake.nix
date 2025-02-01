@@ -18,10 +18,10 @@
       default = big-brother;
     });
 
-    nixosModules = eachSystem (pkgs: rec {
+    nixosModules = rec {
       big-brother = import ./nix/module.nix inputs;
       default = big-brother;
-    });
+    };
 
     devShells = eachSystem (pkgs: {
       default = pkgs.mkShell {
