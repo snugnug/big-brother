@@ -1,6 +1,11 @@
 use crate::github;
 use askama::Template;
-use axum::{extract::Path, response::Html, routing::get, Router};
+use axum::{
+    extract::Path,
+    response::{Html, Redirect},
+    routing::get,
+    Router,
+};
 use reqwest::Client;
 use tower_http::services::ServeFile;
 
@@ -10,7 +15,7 @@ pub async fn serve_web() {
 
 #[derive(Template)]
 #[template(path = "pr.html")]
-struct Test {
+struct PullRequest {
     pr_title: String,
     error: String,
     failed: bool,
@@ -23,20 +28,20 @@ struct Test {
 #[template(path = "index.html")]
 struct Index {}
 
-async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
+async fn get_pr(Path(pr_id): Path<u64>) -> Html<String> {
     let client = Client::builder()
         .user_agent(format!("big-brother {}", env!("CARGO_PKG_VERSION")))
         .build()
         .unwrap();
 
-    let pr = match github::get_pr_info(client.clone(), prId).await {
+    let pr = match github::get_pr_info(client.clone(), pr_id).await {
         Ok(data) => {
-            tracing::debug!("Got pr {}", prId);
+            tracing::debug!("Got pr {}", pr_id);
             data
         }
         Err(err) => {
             tracing::error!("Failed to get pr, {}", err);
-            let template = Test {
+            let template = PullRequest {
                 pr_title: "Errored!".to_string(),
                 failed: true,
                 closed: false,
@@ -49,7 +54,7 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
     };
 
     if pr.state == "closed" {
-        let template = Test {
+        let template = PullRequest {
             pr_title: pr.title,
             failed: false,
             closed: true,
@@ -94,7 +99,7 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
             Ok(data) => in_branches.push(data.unwrap()),
             Err(err) => {
                 tracing::error!("Failed to get pr, {}", err);
-                let template = Test {
+                let template = PullRequest {
                     pr_title: "Errored!".to_string(),
                     failed: true,
                     closed: false,
@@ -111,7 +116,7 @@ async fn get_pr(Path(prId): Path<u64>) -> Html<String> {
         tracing::warn!("Results or in_branches are empty, check logic.");
     }
 
-    let template = Test {
+    let template = PullRequest {
         pr_title: pr.title,
         failed: false,
         closed: false,
@@ -132,7 +137,7 @@ async fn index() -> Html<String> {
 async fn serve() {
     let app = Router::new()
         .route("/pr/{id}", get(get_pr))
-        .route("/pr", get(|| async { Redirect::permanent("/") }))
+        .route("/pr/", get(|| async { Redirect::permanent("/") }))
         .route("/", get(index))
         .route_service("/main.css", ServeFile::new("assets/main.css"));
 

@@ -1,9 +1,4 @@
-// use axum::http::status;
-// use reqwest::{Client, Request, Response};
 use serde::{Deserialize, Serialize};
-// use serde_json::Value;
-// use std::error::Error;
-// use std::fmt::{self, Display, Formatter};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PrInfo {
