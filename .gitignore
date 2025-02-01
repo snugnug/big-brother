@@ -26,3 +26,6 @@ target/
 # Added by cargo
 
 /target
+
+# nix specific
+/result
