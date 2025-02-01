@@ -23,7 +23,7 @@ Add the flake as an input
 
 ```nix
 inputs = {
-	big-brother.url = "github:snugnug/big-brother";
+  big-brother.url = "github:snugnug/big-brother";
 };
 ```
 
