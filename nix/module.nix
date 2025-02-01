@@ -1,13 +1,14 @@
-{
-  options,
+inputs: {
   config,
   lib,
+  pkgs,
 }: let
   cfg = config.modules.desktop.apps.big-brother;
   inherit (lib) mkEnableOption;
+  inherit (pkgs.stdenv.hostPlatform) system;
 in {
   options.modules.desktop.apps.big-brother = {
-    enable = lib.mkEnableOption "big-brother Nixpkgs Tracker";
+    enable = mkEnableOption "big-brother Nixpkgs Tracker";
     hostname = lib.mkOption {
       type = lib.types.str;
       default = "127.0.0.1";
@@ -61,7 +62,7 @@ in {
         User = cfg.user;
         Group = cfg.group;
         EnvironmentFile = lib.mkIf (cfg.environmentFile != null) [cfg.environmentFile];
-        ExecStart = " /nix/store/sr1rvay66p5xczv4pfnkggnkff6rpizx-big-brother-1.0.0/bin/big-brother --host ${cfg.hostname} --port ${toString cfg.port}";
+        ExecStart = "${inputs.self.packages.${system}.big-brother}/bin/big-brother --host ${cfg.hostname} --port ${toString cfg.port}";
 
         # Hardening
         PrivateDevices = true;

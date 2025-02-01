@@ -3,7 +3,7 @@
 
   inputs = {nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";};
 
-  outputs = {
+  outputs = inputs @ {
     self,
     nixpkgs,
   }: let
@@ -19,7 +19,7 @@
     });
 
     nixosModules = eachSystem (pkgs: rec {
-      big-brother = import ./nix/module.nix {big-brother = self.packages."x86_64-linux".big-brother;};
+      big-brother = import ./nix/module.nix inputs;
       default = big-brother;
     });
 
