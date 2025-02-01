@@ -2,6 +2,7 @@ inputs: {
   config,
   lib,
   pkgs,
+  ...
 }: let
   cfg = config.services.big-brother;
   inherit (lib) mkEnableOption;
