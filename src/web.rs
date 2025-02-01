@@ -9,9 +9,9 @@ use axum::{
 use reqwest::Client;
 use tower_http::services::ServeFile;
 
-pub async fn serve_web() {
-    serve().await
-}
+// pub async fn serve_web() {
+//     serve().await
+// }
 
 #[derive(Template)]
 #[template(path = "pr.html")]
@@ -134,16 +134,15 @@ async fn index() -> Html<String> {
     return Html(template.render().unwrap());
 }
 
-async fn serve() {
+pub async fn serve(host: std::net::Ipv4Addr, port: u16) {
+    let host = format!("{}:{}", host, port);
     let app = Router::new()
         .route("/pr/{id}", get(get_pr))
         .route("/pr/", get(|| async { Redirect::permanent("/") }))
         .route("/", get(index))
         .route_service("/main.css", ServeFile::new("assets/main.css"));
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
-        .await
-        .unwrap();
+    let listener = tokio::net::TcpListener::bind(host).await.unwrap();
 
     tracing::info!("Serving web on {}", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap()

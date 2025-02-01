@@ -1,18 +1,25 @@
-// use clap::Parser;
+use clap::Parser;
 // use reqwest::Client;
 // use sqlx::SqlitePool;
+use std::net::Ipv4Addr;
 
 // mod database;
 mod github;
 mod web;
 
-// #[derive(Parser, Debug)]
-// #[command(version, about, long_about = None)]
-// struct Args {
-//     /// Path to store monitored data
-//     #[arg(short, long, default_value = "/var/lib/big-brother")]
-//     datadir: String,
-// }
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    // /// Path to store monitor jobs
+    // #[arg(short, long, default_value = "/var/lib/big-brother")]
+    // datadir: String,
+    /// Port to serve the Web Interface on
+    #[arg(long, default_value_t = 3000)]
+    port: u16,
+    /// Host to serve the Web Interface on
+    #[arg(long, default_value = "127.0.0.1", value_parser = clap::value_parser!(Ipv4Addr))]
+    host: std::net::Ipv4Addr,
+}
 
 #[tokio::main]
 async fn main() {
@@ -41,7 +48,7 @@ async fn main() {
         }
     };
 
-    // let args = Args::parse();
+    let args = Args::parse();
 
     // match std::fs::create_dir_all(args.datadir.clone()) {
     //     Ok(_) => {}
@@ -57,6 +64,5 @@ async fn main() {
     //     .unwrap();
 
     // let db = database::initalize_database(args.datadir).await;
-
-    web::serve_web().await;
+    web::serve(args.host, args.port).await;
 }
