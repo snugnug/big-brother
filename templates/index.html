@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	<link rel="stylesheet" href="/main.css">
+    </head>
+    <h1>Big-Brother, a nixpkgs tracker.</h1>
+    <form action="/pr" method="get">
+        <label for="prId">Pull Request Number: </label>
+        <input id="prId" name="prId" type="text" pattern="[1-9][0-9]*">
+        <button type="submit">Track</button>
+    </form>
+    <script>
+     document.querySelector('form').addEventListener('submit', function(event) {
+         const prId = document.getElementById('prId').value;
+         this.action = `/pr/${prId}`;
+     });
+    </script>
+</html>
+
