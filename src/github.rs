@@ -28,7 +28,10 @@ pub async fn get_pr_info(
     ));
 
     if api_key != None {
-        request = request.header(reqwest::header::AUTHORIZATION, api_key.unwrap());
+        request = request.header(
+            reqwest::header::AUTHORIZATION,
+            format!("Bearer {}", api_key.unwrap()),
+        );
     };
 
     let info = request.send().await?;
@@ -62,7 +65,10 @@ pub async fn compare_branches_api(
     ));
 
     if api_key != None {
-        request = request.header(reqwest::header::AUTHORIZATION, api_key.unwrap());
+        request = request.header(
+            reqwest::header::AUTHORIZATION,
+            format!("Bearer {}", api_key.unwrap()),
+        );
     };
 
     let response = request.send().await?;
