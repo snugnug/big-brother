@@ -5,6 +5,7 @@ pub struct PrInfo {
     pub title: String,
     pub id: u64,
     pub state: String,
+    pub merged: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub merge_commit_sha: Option<String>,
 }

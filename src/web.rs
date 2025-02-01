@@ -53,17 +53,17 @@ async fn get_pr(Path(pr_id): Path<u64>) -> Html<String> {
         }
     };
 
-    if pr.state == "closed" {
-        let template = PullRequest {
-            pr_title: pr.title,
-            failed: false,
-            closed: true,
-            error: "-w-".to_string(),
-            branches: vec![],
-            merged_into: vec![],
-        };
-        return Html(template.render().unwrap());
-    }
+    // if !pr.merged && pr.state == "closed" {
+    //     let template = PullRequest {
+    //         pr_title: pr.title,
+    //         failed: false,
+    //         closed: true,
+    //         error: "-w-".to_string(),
+    //         branches: vec![],
+    //         merged_into: vec![],
+    //     };
+    //     return Html(template.render().unwrap());
+    // }
 
     let target_branches = vec![
         "master".to_string(),
