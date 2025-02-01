@@ -14,17 +14,6 @@ pub struct PrInfo {
     pub merge_commit_sha: Option<String>,
 }
 
-impl Default for PrInfo {
-    fn default() -> PrInfo {
-        PrInfo {
-            title: "".to_string(),
-            id: 0,
-            state: "".to_string(),
-            merge_commit_sha: Some("".to_string()),
-        }
-    }
-}
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PrCompare {
     pub status: String,
