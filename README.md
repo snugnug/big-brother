@@ -1,3 +1,39 @@
 # big-brother
-nixpkgs pr merge notifier that sends notifications over your favorite form of getting notifications
-ill make the rest of this later theres pretty much nothing ready yet
+A nixpkgs tracker (soon-to also be a notifier) for checking merge statues/where a pull request is.
+Currently barebones, but it gets the job done!
+
+## Usage
+Run the executable and optionally change the host and port
+```
+big-brother --host 127.0.0.1 --port 1234
+```
+
+## Compiling
+To compile install the rust toolchain and cargo and run
+```
+cargo build --release
+```
+Binary should be in the `target/release` folder.
+
+## Installation
+<details>
+<summary>Nix</summary>
+Add the flake as an input 
+```nix
+inputs = {
+	big-brother.url = "github:snugnug/big-brother";
+};
+```
+and then use it in your configuration.nix as so
+```nix
+  imports = [inputs.big-brother.nixosModules.default];
+  
+  services.big-brother = {
+	  enable = true;
+      port = 43523;
+      environmentFile = "/srv/secrets/big-brother.env";
+    };
+  };
+```
+</details>
+
