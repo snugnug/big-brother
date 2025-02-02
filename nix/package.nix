@@ -30,7 +30,7 @@ in
     ];
 
     # cargoHash = lib.fakeHash;
-    cargoHash = "sha256-eXzRQELBZwAKkFnPI+ckXasDsm3NAVfBeVlCZGShLL8=";
+    cargoHash = "sha256-PcG7boF+FINiWzsQfrdVzpSXOg9ni6ElolRGrB+bPPE=";
 
     meta = {
       description = "A nixpkgs tracker with notifications!";
