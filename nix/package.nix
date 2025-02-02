@@ -5,7 +5,7 @@
   pkg-config,
   openssl,
 }: let
-  version = "1.0.1";
+  version = "1.0.2";
 in
   rustPlatform.buildRustPackage {
     pname = "big-brother";
