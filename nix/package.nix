@@ -18,7 +18,7 @@ in
       repo = "big-brother";
       tag = "v${version}";
       # hash = lib.fakeHash;
-      hash = "sha256-RdGcNscZG4AkCqumjpX8Sp8wgKwP6OvLR6R9J7sIkUk=";
+      hash = "sha256-wJ9aunZ/i6H47w/sZN/ikcRlpOwntJ60DOnJuld2tfU=";
     };
 
     nativeBuildInputs = [
@@ -30,7 +30,7 @@ in
     ];
 
     # cargoHash = lib.fakeHash;
-    cargoHash = "sha256-PcG7boF+FINiWzsQfrdVzpSXOg9ni6ElolRGrB+bPPE=";
+    cargoHash = "sha256-NH7HWBKiK35yhGVVc5v2gTBRSefduZF2Z2c+qS9xDtQ=";
 
     meta = {
       description = "A nixpkgs tracker with notifications!";
