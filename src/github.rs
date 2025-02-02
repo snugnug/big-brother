@@ -41,6 +41,7 @@ pub async fn get_pr_info(
 
     if info.status().is_success() {
         let pr_info = info.json::<PrInfo>().await?;
+        tracing::debug!("{}", serde_json::to_string_pretty(&pr_info).unwrap());
         Ok(pr_info)
     } else {
         Err(format!("failed with error code {}", info.status()).into())
