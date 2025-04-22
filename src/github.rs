@@ -1,4 +1,66 @@
+use reqwest::{Client, RequestBuilder, StatusCode};
 use serde::{Deserialize, Serialize};
+use std::fmt;
+use std::time::{Duration, Instant};
+
+// Define repository type for flexibility
+#[derive(Debug, Clone)]
+pub struct Repository {
+    pub owner: String,
+    pub name: String,
+}
+
+impl Default for Repository {
+    fn default() -> Self {
+        Self {
+            owner: "nixos".to_string(),
+            name: "nixpkgs".to_string(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum GithubError {
+    RequestFailed(reqwest::Error),
+    RateLimitExceeded,
+    ApiError { status: StatusCode, message: String },
+    SerializationError(serde_json::Error),
+}
+
+impl fmt::Display for GithubError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::RequestFailed(e) => write!(f, "API request failed: {}", e),
+            Self::RateLimitExceeded => write!(f, "Rate limit exceeded"),
+            Self::ApiError { status, message } => {
+                write!(f, "API returned error: {} - {}", status, message)
+            }
+            Self::SerializationError(e) => write!(f, "Serialization error: {}", e),
+        }
+    }
+}
+
+impl std::error::Error for GithubError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::RequestFailed(e) => Some(e),
+            Self::SerializationError(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+
+impl From<reqwest::Error> for GithubError {
+    fn from(err: reqwest::Error) -> Self {
+        Self::RequestFailed(err)
+    }
+}
+
+impl From<serde_json::Error> for GithubError {
+    fn from(err: serde_json::Error) -> Self {
+        Self::SerializationError(err)
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct PrInfo {
@@ -15,76 +77,193 @@ pub struct PrCompare {
     pub status: String,
 }
 
-// TODO(sako):: Better error handling
+#[derive(Serialize, Deserialize, Debug)]
+struct RateLimit {
+    resources: RateLimitResources,
+}
 
-pub async fn get_pr_info(
-    client: reqwest::Client,
-    pr: u64,
-) -> Result<PrInfo, Box<dyn std::error::Error>> {
-    let api_key = std::env::var("GITHUB_API_KEY").ok();
+#[derive(Serialize, Deserialize, Debug)]
+struct RateLimitResources {
+    core: RateLimitData,
+}
 
-    let mut request = client.get(format!(
-        "https://api.github.com/repos/nixos/nixpkgs/pulls/{}",
-        pr
-    ));
+#[derive(Serialize, Deserialize, Debug)]
+struct RateLimitData {
+    limit: u32,
+    remaining: u32,
+    reset: u64,
+}
 
-    if api_key != None {
-        request = request.header(
-            reqwest::header::AUTHORIZATION,
-            format!("Bearer {}", api_key.unwrap()),
-        );
-    };
+// Static rate limit tracking for unauthenticated requests
+static mut LAST_REQUEST: Option<Instant> = None;
+const UNAUTHENTICATED_DELAY_MS: u64 = 1000; // 1 second between requests
 
-    let info = request.send().await?;
-
-    tracing::debug!("{}", info.status());
-
-    if info.status().is_success() {
-        let pr_info = info.json::<PrInfo>().await?;
-        tracing::debug!("{}", serde_json::to_string_pretty(&pr_info).unwrap());
-        Ok(pr_info)
-    } else {
-        Err(format!("failed with error code {}", info.status()).into())
+fn authorize_request(request: RequestBuilder) -> RequestBuilder {
+    match std::env::var("GITHUB_API_KEY") {
+        Ok(token) if !token.is_empty() => {
+            request.header(reqwest::header::AUTHORIZATION, format!("Bearer {}", token))
+        }
+        _ => request,
     }
 }
 
-// TODO(sako):: Make this optional and require an API Token to avoid ratelimits and make one that uses
-// locally installed git instead to check if the commit is in a nixpkgs branch
-pub async fn compare_branches_api(
-    client: reqwest::Client,
-    branch: String,
-    commit_hash: String,
-) -> Result<bool, Box<dyn ::std::error::Error + Send + Sync>> {
-    tracing::debug!("{}", branch.to_string());
-    tracing::debug!("{}", commit_hash);
+async fn handle_rate_limit(client: &Client, authenticated: bool) -> Result<(), GithubError> {
+    if authenticated {
+        // For authenticated requests, check the rate limit via API
+        let request = authorize_request(client.get("https://api.github.com/rate_limit"));
+        let response = request.send().await?;
 
-    let api_key = std::env::var("GITHUB_API_KEY").ok();
+        if response.status() == StatusCode::OK {
+            let rate_limit: RateLimit = response.json().await?;
+            let remaining = rate_limit.resources.core.remaining;
 
-    let mut request = client.get(format!(
-        "https://api.github.com/repos/nixos/nixpkgs/compare/{}...{}",
-        branch.to_string(),
-        commit_hash
-    ));
+            if remaining <= 5 {
+                let reset_time = rate_limit.resources.core.reset as u64;
+                let current_time = std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap_or_default()
+                    .as_secs();
 
-    if api_key != None {
-        request = request.header(
-            reqwest::header::AUTHORIZATION,
-            format!("Bearer {}", api_key.unwrap()),
-        );
-    };
-
-    let response = request.send().await?;
-
-    if response.status().is_success() {
-        let output = response.json::<PrCompare>().await.unwrap();
-        if output.status == "behind" || output.status == "identical" {
-            tracing::debug!("In nixpkgs!");
-            return Ok(true);
-        } else {
-            tracing::debug!("lol no");
-            return Ok(false);
+                if reset_time > current_time {
+                    let wait_time = reset_time - current_time + 1;
+                    tracing::warn!(
+                        "Rate limit nearly exceeded ({}). Waiting {} seconds",
+                        remaining,
+                        wait_time
+                    );
+                    tokio::time::sleep(Duration::from_secs(wait_time)).await;
+                }
+            }
         }
     } else {
-        return Err(format!("failed with error code {}", response.status()).into());
+        // For unauthenticated requests, use a simple delay
+        unsafe {
+            if let Some(last_time) = LAST_REQUEST {
+                let elapsed = last_time.elapsed();
+                if elapsed < Duration::from_millis(UNAUTHENTICATED_DELAY_MS) {
+                    let wait_time = Duration::from_millis(UNAUTHENTICATED_DELAY_MS) - elapsed;
+                    tracing::debug!("Rate limiting: waiting {:?} before next request", wait_time);
+                    tokio::time::sleep(wait_time).await;
+                }
+            }
+            LAST_REQUEST = Some(Instant::now());
+        }
+    }
+
+    Ok(())
+}
+
+pub async fn get_pr_info(
+    client: &Client,
+    pr: u64,
+    repo: Option<&Repository>,
+) -> Result<PrInfo, GithubError> {
+    let default_repo = Repository::default();
+    let repo = repo.unwrap_or(&default_repo);
+
+    let authenticated = std::env::var("GITHUB_API_KEY").is_ok();
+
+    // Even when we *do* have an API key, GitHub has rate limits to the number of
+    // requests you can do. If you use Nix, you are likely to hit those often because
+    // you will normally be sending a lot of requests. Let's handle rate limits by
+    // postponing the task for a while if we hit a rate limit instead of panicking.
+    handle_rate_limit(client, authenticated).await?;
+
+    tracing::info!("Fetching PR #{} from {}/{}", pr, repo.owner, repo.name);
+    let url = format!(
+        "https://api.github.com/repos/{}/{}/pulls/{}",
+        repo.owner, repo.name, pr
+    );
+
+    let request = authorize_request(client.get(&url));
+    let response = request.send().await?;
+
+    tracing::debug!("PR #{} response status: {}", pr, response.status());
+
+    match response.status() {
+        StatusCode::OK => {
+            let pr_info = response.json::<PrInfo>().await?;
+            tracing::debug!(
+                pr_id = pr_info.id,
+                pr_title = pr_info.title,
+                "PR info retrieved successfully"
+            );
+            Ok(pr_info)
+        }
+        StatusCode::FORBIDDEN | StatusCode::TOO_MANY_REQUESTS => {
+            tracing::error!("Rate limit exceeded when fetching PR #{}", pr);
+            Err(GithubError::RateLimitExceeded)
+        }
+        status => {
+            let message = response
+                .text()
+                .await
+                .unwrap_or_else(|_| "No error message".to_string());
+            tracing::error!("Failed to fetch PR #{}: Status {}: {}", pr, status, message);
+            Err(GithubError::ApiError { status, message })
+        }
+    }
+}
+
+pub async fn compare_branches_api(
+    client: &Client,
+    branch: &str,
+    commit_hash: &str,
+    repo: Option<&Repository>,
+) -> Result<bool, GithubError> {
+    let default_repo = Repository::default();
+    let repo = repo.unwrap_or(&default_repo);
+
+    let authenticated = std::env::var("GITHUB_API_KEY").is_ok();
+    handle_rate_limit(client, authenticated).await?;
+
+    tracing::info!(
+        "Comparing commit {} with branch {} in {}/{}",
+        commit_hash,
+        branch,
+        repo.owner,
+        repo.name
+    );
+
+    let url = format!(
+        "https://api.github.com/repos/{}/{}/compare/{}...{}",
+        repo.owner, repo.name, branch, commit_hash
+    );
+
+    let request = authorize_request(client.get(&url));
+    let response = request.send().await?;
+
+    tracing::debug!(
+        "Compare response status: {}, URL: {}",
+        response.status(),
+        url
+    );
+
+    match response.status() {
+        StatusCode::OK => {
+            let output = response.json::<PrCompare>().await?;
+            let is_in_nixpkgs = output.status == "behind" || output.status == "identical";
+
+            tracing::info!(
+                "Commit {} is {} branch {}",
+                commit_hash,
+                if is_in_nixpkgs { "in" } else { "not in" },
+                branch
+            );
+
+            Ok(is_in_nixpkgs)
+        }
+        StatusCode::FORBIDDEN | StatusCode::TOO_MANY_REQUESTS => {
+            tracing::error!("Rate limit exceeded when comparing branches");
+            Err(GithubError::RateLimitExceeded)
+        }
+        status => {
+            let message = response
+                .text()
+                .await
+                .unwrap_or_else(|_| "No error message".to_string());
+            tracing::error!("Failed to compare branches: Status {}: {}", status, message);
+            Err(GithubError::ApiError { status, message })
+        }
     }
 }
