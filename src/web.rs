@@ -189,7 +189,7 @@ pub async fn serve(host: Ipv4Addr, port: u16) {
                 "Serving web on {}",
                 listener
                     .local_addr()
-                    .unwrap_or_else(|_| { format!("{}", addr).parse().unwrap() })
+                    .unwrap_or_else(|_| { addr.parse().unwrap() })
             );
 
             if let Err(e) = axum::serve(listener, app).await {
