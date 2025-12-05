@@ -10,9 +10,9 @@ mod web;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    // /// Path to store monitor jobs
-    // #[arg(short, long, default_value = "/var/lib/big-brother")]
-    // datadir: String,
+    /// Path to store data.
+    #[arg(short, long, default_value = "/var/lib/big-brother")]
+    datadir: String,
     /// Port to serve the Web Interface on
     #[arg(long, default_value_t = 3000)]
     port: u16,
