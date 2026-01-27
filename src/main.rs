@@ -3,7 +3,7 @@ use clap::Parser;
 // use sqlx::SqlitePool;
 use std::net::Ipv4Addr;
 
-// mod database;
+mod database;
 mod github;
 mod web;
 
@@ -24,15 +24,14 @@ struct Args {
 #[tokio::main]
 async fn main() {
     let subscriber = tracing_subscriber::fmt()
-        // Use a more compact, abbreviated log format
+        // compact
         .compact()
-        // Display source code file paths
+        // show source file
         .with_file(true)
-        // Display source code line numbers
+        // show line number
         .with_line_number(true)
-        // Don't display the event's target (module path)
+        // dont show module path
         .with_target(false)
-        // Build the subscriber
         .with_max_level(if cfg!(debug_assertions) {
             tracing::Level::DEBUG
         } else {
@@ -64,5 +63,7 @@ async fn main() {
     //     .unwrap();
 
     // let db = database::initalize_database(args.datadir).await;
-    web::serve(args.host, args.port).await;
+    tokio::join!(
+        web::serve(args.host, args.port),
+    );
 }

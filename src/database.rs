@@ -11,10 +11,12 @@ pub struct PullRequest {
     pub merged: bool,
     pub merged_into: Vec<String>,
     pub unmerged_into: Vec<String>,
+    pub last_checked: chrono::DateTime<chrono::Utc>
+    pub watched_by: Vec<u64>,
 }
 
 #[derive(FromRow)]
-pub struct DiscordUsers {
+pub struct DiscordUser {
     pub id: u64,
     pub requested_server_id: u64,
     pub watching_prs: Vec<u64>,
