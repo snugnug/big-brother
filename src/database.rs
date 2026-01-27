@@ -11,7 +11,7 @@ pub struct PullRequest {
     pub merged: bool,
     pub merged_into: Vec<String>,
     pub unmerged_into: Vec<String>,
-    pub last_checked: chrono::DateTime<chrono::Utc>
+    pub last_checked: chrono::DateTime<chrono::Utc>,
     pub watched_by: Vec<u64>,
 }
 
