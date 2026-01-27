@@ -29,3 +29,5 @@ target/
 
 # nix specific
 /result
+
+.env
