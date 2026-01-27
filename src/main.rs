@@ -5,6 +5,7 @@ use std::net::Ipv4Addr;
 
 mod database;
 mod github;
+mod discord;
 mod web;
 
 #[derive(Parser, Debug)]
@@ -65,5 +66,6 @@ async fn main() {
     // let db = database::initalize_database(args.datadir).await;
     tokio::join!(
         web::serve(args.host, args.port),
+        discord::start(),
     );
 }
