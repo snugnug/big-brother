@@ -1,3 +1,7 @@
+# big-brother is no longer maintained
+the source code is still accessible, but it is unfinished and really bad!
+just sign up for notifications on the pull request instead 
+
 # big-brother
 A nixpkgs tracker (soon-to also be a notifier) for checking merge statues/where a pull request is.
 Currently barebones, but it gets the job done!
